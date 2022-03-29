@@ -52,7 +52,7 @@ function httpReducer(state: HttpReducerState, action: HttpReducerAction) {
   return state;
 }
 
-function useHttp(requestFunction: (data: unknown) => any, startWithPending: boolean = false) {
+function useHttp(requestFunction: (data: any) => any, startWithPending: boolean = false) {
   const [httpState, dispatch] = useReducer(httpReducer, {
     status: startWithPending ? HttpReducerStatus.PENDING : null,
     data: null,
