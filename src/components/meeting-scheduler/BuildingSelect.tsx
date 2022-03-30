@@ -4,7 +4,8 @@ import { getBuildingsBySite } from "../../lib/api";
 import { Building } from "../../model/SOFMS-Model";
 
 interface BuildingSelectProps {
-  siteId: number
+  siteId: number,
+  buildingChange: (buildingId: number) => void
 }
 
 const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
@@ -14,21 +15,24 @@ const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
     data: loadedBuildings,
     error: buildingRequestError,
   } = useHttp(getBuildingsBySite, true);
-  let [building, setBuilding] = useState("--Select a Building--");
+  // let [building, setBuilding] = useState("--Select a Building--");
 
   useEffect(() => {
-    sendBuildingsRequest(props.siteId);
-  }, [sendBuildingsRequest]);
+    if (props.siteId > 0) {
+      sendBuildingsRequest(props.siteId);
+    }
+  }, [sendBuildingsRequest, props.siteId]);
 
   const handleBuildingChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setBuilding(e.target.value);
+    // setBuilding(e.target.value);
+    props.buildingChange(parseInt(e.target.value));
   };
 
-  if (buildingRequestStatus === HttpReducerStatus.PENDING) {
-    return <div>PENDING</div>;
-  }
+  // if (buildingRequestStatus === HttpReducerStatus.PENDING) {
+  //   return <div>PENDING</div>;
+  // }
 
   if (buildingRequestError) {
     // return <p>{buildingRequestError}</p>;
@@ -43,6 +47,7 @@ const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
         className="form-select"
         aria-label="Select a Location"
         onChange={handleBuildingChange}
+        disabled={props.siteId === 0}
       >
         <option value="--Select a Building--">Select a Building</option>
         {loadedBuildings &&

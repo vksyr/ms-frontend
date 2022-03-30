@@ -4,7 +4,7 @@ import { getAllSites } from "../../lib/api";
 import { Site } from "../../model/SOFMS-Model";
 
 interface SiteSelectProps {
-  siteChange: (siteId: number) => {}
+  siteChange: (siteId: number) => void
 }
 
 const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
@@ -24,7 +24,7 @@ const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     // setSite(e.target.value);
-    props.siteChange(e.target.value);
+    props.siteChange(parseInt(e.target.value));
 
   };
 

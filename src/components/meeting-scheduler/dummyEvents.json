@@ -1,0 +1,14 @@
+[
+    { title: "event 1", start: "2022-03-21T14:00:00.637Z", end: "2022-03-21T14:30:00.637Z" },
+    { title: "event 2", start: "2022-03-22T18:00:00.637Z", end: "2022-03-22T18:30:00.637Z" },
+    {
+      title: "my recurring event",
+      rrule:
+        "DTSTART:20220323T103000Z\nRRULE:FREQ=WEEKLY;INTERVAL=5;UNTIL=20220601;BYDAY=MO,FR",
+    },
+    {
+      title: "Another Recurring Event",
+      rrule:
+        "DTSTART:20220324T170000\nRRULE:FREQ=WEEKLY;UNTIL=20220630T170200Z;COUNT=30;INTERVAL=1;WKST=MO\nEXDATE:20220324T170000Z",
+    },
+  ]
