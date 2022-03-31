@@ -6,16 +6,12 @@
           {{ time }}
         </v-card-title>
         <v-card-subtitle>
-          {{ location }}
+          {{ site }}
         </v-card-subtitle>
       </v-col>
       <v-col cols="5">
-        <v-card-title>
-          {{ room }}
-        </v-card-title>
-        <v-card-subtitle>
-          {{ building }}
-        </v-card-subtitle>
+        <v-card-title> Room {{ room }} </v-card-title>
+        <v-card-subtitle> Building {{ building }} </v-card-subtitle>
       </v-col>
       <v-col cols="2" align-self="center">
         <v-btn block elevation="0" color="white" height="88" class="px-0">
@@ -30,11 +26,11 @@
 export default {
   name: 'MeetingCard',
   props: {
-    time: {
-      type: String,
+    dateTime: {
+      type: Date,
       required: false
     },
-    location: {
+    site: {
       type: String,
       required: false
     },
@@ -48,6 +44,27 @@ export default {
     }
   },
   data: () => ({}),
-  methods: {}
+  methods: {},
+  computed: {
+    time() {
+      let hours = this.dateTime.getHours()
+      let minutes = this.dateTime.getMinutes()
+      let time = ''
+
+      if (hours < 10) {
+        time = `0${hours}`
+      } else {
+        time = `${hours}`
+      }
+
+      if (minutes === 0) {
+        time = `${time}00`
+      } else {
+        time = `${time}${minutes}`
+      }
+
+      return time
+    }
+  }
 }
 </script>
