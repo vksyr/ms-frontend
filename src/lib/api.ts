@@ -1,4 +1,5 @@
-import RRule from "rrule";
+import RRule, { Options } from "rrule";
+import { MtgEventExtended } from "../model/MtgEventExtended";
 import { MtgEvent } from "../model/SOFMS-Model";
 
 const APIURL = process.env.REACT_APP_MS_API_URL;
@@ -159,7 +160,7 @@ export async function getRoomsByBuilding(buildingId: number) {
   return transformedRooms;
 }
 
-export async function getEvents() {
+export async function getAllEvents() {
   console.debug("getAllEvents");
   const response = await fetch(`${APIURL}/Event`);
   console.debug("Response: ", response);
@@ -171,41 +172,109 @@ export async function getEvents() {
 
   console.debug("Data: ", data);
 
+  const transformedEvents = processEvents(data);
+
+  console.debug("Transformed Events: ", transformedEvents);
+
+  return transformedEvents;
+}
+
+export async function getEventsBy(roomID?: number, classificationID?: number) {
+  console.debug("getEventsBy");
+  let requestUrl = `${APIURL}/Event?`;
+  if (roomID && roomID > 0) {
+    requestUrl += "roomID=" + roomID + "&";
+  }
+
+  if (classificationID && classificationID > 0) {
+    requestUrl += "classificationID=" + classificationID;
+  }
+  const response = await fetch(requestUrl);
+  console.debug("Response: ", response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not fetch rooms.");
+  }
+
+  console.debug("Data: ", data);
+
+  const transformedEvents = processEvents(data);
+
+  console.debug("Transformed Events: ", transformedEvents);
+
+  return transformedEvents;
+}
+
+const processEvents = (events: MtgEvent[]) => {
   const transformedEvents = [];
 
-  for (const key in data) {
-    const eventObj = {
+  for (const key in events) {
+    const eventObj: MtgEventExtended = {
       id: key,
-      title: data[key].name,
-      start: data[key].startDate,
-      end: data[key].endDate,
+      title: events[key].name as string,
+      start: new Date(events[key].startDate as string),
+      end: new Date(events[key].endDate as string),
       allDay: false,
-      ...data[key],
+      ...events[key],
     };
 
-    if(data[key].recurrenceRule) {
-      if(data[key].startDate) {
-        const startDate = new Date(data[key].startDate);
-        const endDate = new Date(data[key].endDate);
+    if (events[key].recurrenceRule) {
+      if (events[key].startDate && events[key].endDate) {
+        const startDate = new Date(events[key].startDate as string);
+        const endDate = new Date(events[key].endDate as string);
 
-        let rruleOptions = RRule.parseString(`RRULE:${data[key].recurrenceRule}`);
+        let rruleOptions: Partial<Options> = RRule.parseString(
+          `RRULE:${events[key].recurrenceRule}`
+        );
         console.debug("RROptions: ", rruleOptions);
         rruleOptions.dtstart = startDate;
         console.debug("RROptions: ", rruleOptions);
         // let rrule = new RRule(rruleOptions);
         eventObj.rrule = rruleOptions;
 
-
-        let duration = (endDate.valueOf() - startDate.valueOf());
-        eventObj.duration = { milliseconds: duration};
+        let duration = endDate.valueOf() - startDate.valueOf();
+        eventObj.duration = { milliseconds: duration };
       }
-
     }
 
     transformedEvents.push(eventObj);
   }
 
-  console.debug("Transformed Events: ", transformedEvents);
-
   return transformedEvents;
+};
+
+export async function addEvent(newEvent: MtgEvent) {
+  console.debug("getAllEvents");
+
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(newEvent),
+  };
+
+  const response = await fetch(`${APIURL}/Event`, requestOptions);
+  console.debug("Response: ", response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not create event.");
+  }
+
+  console.debug("Data: ", data);
+
+  const transformedRooms = [];
+
+  for (const key in data) {
+    const roomObj = {
+      id: key,
+      ...data[key],
+    };
+
+    transformedRooms.push(roomObj);
+  }
+
+  return transformedRooms;
 }
