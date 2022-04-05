@@ -1,165 +1,82 @@
 import RRule, { Options } from "rrule";
 import { MtgEventExtended } from "../model/MtgEventExtended";
-import { MtgEvent } from "../model/SOFMS-Model";
+import {
+  Building,
+  MtgClassification,
+  MtgEvent,
+  MtgJDirectorate,
+  Organization,
+  Room,
+  Site,
+  User,
+} from "../model/SOFMS-Model";
+import { get, post } from "./http";
 
 const APIURL = process.env.REACT_APP_MS_API_URL;
 
 export async function getAllOrganizations() {
   console.debug("getAllOrganizations");
-  const response = await fetch(`${APIURL}/Organization`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Organization`);
+  const response = await get<Organization[]>(`${APIURL}/Organization`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch organizations.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedOrganizations = [];
-
-  for (const key in data) {
-    const organizationObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedOrganizations.push(organizationObj);
-  }
-
-  return transformedOrganizations;
+  return response;
 }
 
 export async function getAllSites() {
   console.debug("getAllSites");
-  const response = await fetch(`${APIURL}/Site`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Site`);
+  const response = await get<Site[]>(`${APIURL}/Site`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch sites.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedSites = [];
-
-  for (const key in data) {
-    const siteObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedSites.push(siteObj);
-  }
-
-  return transformedSites;
+  return response;
 }
 
 export async function getAllBuildings() {
   console.debug("getAllBuildings");
-  const response = await fetch(`${APIURL}/Building`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Building`);
+  const response = await get<Building[]>(`${APIURL}/Building`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch buildings.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedBuildings = [];
-
-  for (const key in data) {
-    const buildingObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedBuildings.push(buildingObj);
-  }
-
-  return transformedBuildings;
+  return response;
 }
 
 export async function getBuildingsBySite(siteId: number) {
   console.debug("getBuildingsBySite");
-  const response = await fetch(`${APIURL}/Building?siteID=${siteId}`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Building?siteID=${siteId}`);
+  const response = await get<Building[]>(`${APIURL}/Building?siteID=${siteId}`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch buildings.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedBuildings = [];
-
-  for (const key in data) {
-    const buildingObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedBuildings.push(buildingObj);
-  }
-
-  return transformedBuildings;
+  return response;
 }
 
 export async function getAllRooms() {
   console.debug("getAllRooms");
-  const response = await fetch(`${APIURL}/Room`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Room`);
+  const response = await get<Room[]>(`${APIURL}/Room`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch rooms.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedRooms = [];
-
-  for (const key in data) {
-    const roomObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedRooms.push(roomObj);
-  }
-
-  return transformedRooms;
+  return response;
 }
 
 export async function getRoomsByBuilding(buildingId: number) {
   console.debug("getRoomsByBuilding");
-  const response = await fetch(`${APIURL}/Room?buildingID=${buildingId}`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Room?buildingID=${buildingId}`);
+  const response = await get<Room[]>(`${APIURL}/Room?buildingID=${buildingId}`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch rooms.");
-  }
-
-  console.debug("Data: ", data);
-
-  const transformedRooms = [];
-
-  for (const key in data) {
-    const roomObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedRooms.push(roomObj);
-  }
-
-  return transformedRooms;
+  return response;
 }
 
+export async function getClassifications() {
+  console.debug("getClassifications");
+  // const response = await fetch(`${APIURL}/Room`);
+  const response = await get<MtgClassification[]>(`${APIURL}/Classification`);
+
+  return response;
+}
+
+export async function getJDirectorates() {
+  console.debug("getJDirectorates");
+  // const response = await fetch(`${APIURL}/Room`);
+  const response = await get<MtgJDirectorate[]>(`${APIURL}/JDirectorate`);
+
+  return response;
+}
 export async function getAllEvents() {
   console.debug("getAllEvents");
   const response = await fetch(`${APIURL}/Event`);
@@ -245,36 +162,25 @@ const processEvents = (events: MtgEvent[]) => {
 };
 
 export async function addEvent(newEvent: MtgEvent) {
-  console.debug("getAllEvents");
+  console.debug("AddEvent");
 
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newEvent),
-  };
+  // const requestOptions: RequestInit = {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify(newEvent),
+  // };
 
-  const response = await fetch(`${APIURL}/Event`, requestOptions);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  // const response = await fetch(`${APIURL}/Event`, requestOptions);
+  const response = await post<MtgEvent>(`${APIURL}/Event`, newEvent);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not create event.");
-  }
+  return response;
+}
 
-  console.debug("Data: ", data);
+export async function searchUsers(search: string) {
+  console.debug("searchUsers");
+  const response = await get<User[]>(`${APIURL}/User`);
 
-  const transformedRooms = [];
-
-  for (const key in data) {
-    const roomObj = {
-      id: key,
-      ...data[key],
-    };
-
-    transformedRooms.push(roomObj);
-  }
-
-  return transformedRooms;
+  return response;
 }

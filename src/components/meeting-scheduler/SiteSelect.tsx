@@ -1,5 +1,4 @@
 import { Fragment, FunctionComponent, useEffect, useState } from "react";
-import useHttp, { HttpReducerStatus } from "../../hooks/use-http";
 import { getAllSites } from "../../lib/api";
 import { Site } from "../../model/SOFMS-Model";
 
@@ -8,17 +7,13 @@ interface SiteSelectProps {
 }
 
 const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
-  const {
-    sendRequest: sendSitesRequest,
-    status: siteRequestStatus,
-    data: loadedSites,
-    error: siteRequestError,
-  } = useHttp(getAllSites, true);
-  // let [site, setSite] = useState("--Select a Site--");
+  const [sites, setSites] = useState<Site[]>();
 
   useEffect(() => {
-    sendSitesRequest();
-  }, [sendSitesRequest]);
+    getAllSites().then((responseData) => {
+      setSites(responseData.parsedBody);
+    });
+  }, [getAllSites]);
 
   const handleSiteChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -27,15 +22,6 @@ const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
     props.siteChange(parseInt(e.target.value));
 
   };
-
-  if (siteRequestStatus === HttpReducerStatus.PENDING) {
-    return <div>PENDING</div>;
-  }
-
-  if (siteRequestError) {
-    // return <p>{siteRequestError}</p>;
-    // TODO: Show error message
-  }
 
   return (
     <Fragment>
@@ -47,8 +33,8 @@ const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
         onChange={handleSiteChange}
       >
         <option value="--Select a Site--">Select a Site</option>
-        {loadedSites &&
-          loadedSites.map((site: Site) => (
+        {sites &&
+          sites.map((site: Site) => (
             <option key={site.id} value={site.id}>
               {site.name}
             </option>

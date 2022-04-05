@@ -9,19 +9,16 @@ interface BuildingSelectProps {
 }
 
 const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
-  const {
-    sendRequest: sendBuildingsRequest,
-    status: buildingRequestStatus,
-    data: loadedBuildings,
-    error: buildingRequestError,
-  } = useHttp(getBuildingsBySite, true);
+  const [buildings, setBuildings] = useState<Building[]>();
   // let [building, setBuilding] = useState("--Select a Building--");
 
   useEffect(() => {
     if (props.siteId > 0) {
-      sendBuildingsRequest(props.siteId);
+      getBuildingsBySite(props.siteId).then((responseData) => {
+        setBuildings(responseData.parsedBody);
+      });
     }
-  }, [sendBuildingsRequest, props.siteId]);
+  }, [getBuildingsBySite, props.siteId]);
 
   const handleBuildingChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -29,15 +26,6 @@ const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
     // setBuilding(e.target.value);
     props.buildingChange(parseInt(e.target.value));
   };
-
-  // if (buildingRequestStatus === HttpReducerStatus.PENDING) {
-  //   return <div>PENDING</div>;
-  // }
-
-  if (buildingRequestError) {
-    // return <p>{buildingRequestError}</p>;
-    // TODO: Show error message
-  }
 
   return (
     <Fragment>
@@ -50,8 +38,8 @@ const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
         disabled={props.siteId === 0}
       >
         <option value="--Select a Building--">Select a Building</option>
-        {loadedBuildings &&
-          loadedBuildings.map((building: Building) => (
+        {buildings &&
+          buildings.map((building: Building) => (
             <option key={building.id} value={building.id}>
               {building.name}
             </option>

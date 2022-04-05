@@ -9,19 +9,16 @@ interface RoomSelectProps {
 }
 
 const RoomSelect: FunctionComponent<RoomSelectProps> = (props) => {
-  const {
-    sendRequest: sendRoomsRequest,
-    status: roomRequestStatus,
-    data: loadedRooms,
-    error: roomRequestError,
-  } = useHttp(getRoomsByBuilding, true);
+  const [rooms, setRooms] = useState<Room[]>();
   // let [room, setRoom] = useState("--Select a Room--");
 
   useEffect(() => {
     if (props.buildingId > 0) {
-      sendRoomsRequest(props.buildingId);
+      getRoomsByBuilding(props.buildingId).then((responseData) => {
+        setRooms(responseData.parsedBody);
+      });
     }
-  }, [sendRoomsRequest, props.buildingId]);
+  }, [getRoomsByBuilding, props.buildingId]);
 
   const handleRoomChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -29,15 +26,6 @@ const RoomSelect: FunctionComponent<RoomSelectProps> = (props) => {
     // setRoom(e.target.value);
     props.roomChange(parseInt(e.target.value));
   };
-
-  // if (roomRequestStatus === HttpReducerStatus.PENDING) {
-  //   return <div>PENDING</div>;
-  // }
-
-  if (roomRequestError) {
-    // return <p>{roomRequestError}</p>;
-    // TODO: Show error message
-  }
 
   return (
     <Fragment>
@@ -50,8 +38,8 @@ const RoomSelect: FunctionComponent<RoomSelectProps> = (props) => {
         disabled={props.buildingId === 0}
       >
         <option value="--Select a Room--">Select a Room</option>
-        {loadedRooms &&
-          loadedRooms.map((room: Room) => (
+        {rooms &&
+          rooms.map((room: Room) => (
             <option key={room.id} value={room.id}>
               {room.name}
             </option>
