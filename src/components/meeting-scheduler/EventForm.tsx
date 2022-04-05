@@ -1,16 +1,9 @@
-import React, {
-  Fragment,
-  FunctionComponent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Fragment, FunctionComponent, useRef, useState } from "react";
 
 import classes from "./EventForm.module.css";
-import { addEvent, getEventsBy } from "../../lib/api";
+import { addEvent } from "../../lib/api";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
-import Typeahead from "react-bootstrap-typeahead/types/core/Typeahead";
-import { MtgEvent } from "../../model/SOFMS-Model";
+import { MtgEvent, User } from "../../model/SOFMS-Model";
 import ClassificationSelect from "./ClassificationSelect";
 import JDirectorateSelect from "./JDirectorateSelect";
 import UserPicker from "./UserPicker";
@@ -25,27 +18,26 @@ interface EventFormProps {
 }
 
 const EventForm: FunctionComponent<EventFormProps> = (props) => {
-
+  const [selectedPOC, setSelectedPOC] = useState<User>();
   const startTimeRef = useRef<HTMLInputElement>(null);
   const endTimeRef = useRef<HTMLInputElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const jDirectorateRef = useRef<HTMLSelectElement>(null);
   const classificationRef = useRef<HTMLSelectElement>(null);
-  const pocRef = useRef<Typeahead>(null);
+  // const pocRef = useRef<Typeahead>(null);
+
+  const pocChangeHandler = (poc: User) => {
+    setSelectedPOC(poc);
+  };
 
   const newMeetingBookHandler = () => {
     const newEvent: MtgEvent = {};
     newEvent.roomID = props.roomId;
     newEvent.approvalCodeID = 1;
-    newEvent.pocid = 2;
 
-    if (pocRef && pocRef.current) {
-      // pocRef.current
-      const userPickerInput = pocRef.current.getInput();
-      if (userPickerInput) {
-        console.debug("POC ID: ", userPickerInput.value);
-        newEvent.pocid = parseInt(userPickerInput.value);
-      }
+    if (selectedPOC) {
+      console.debug("Selected POC: ", selectedPOC);
+      newEvent.pocid = selectedPOC.id;
     }
     if (jDirectorateRef && jDirectorateRef.current) {
       newEvent.jDirectorateID = parseInt(jDirectorateRef.current.value);
@@ -60,7 +52,7 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
       const newMinute = parseInt(startTimeRef.current.value.substring(3, 5));
       tmpStartDate.setHours(newHour);
       tmpStartDate.setMinutes(newMinute);
-      newEvent.startDate = tmpStartDate.toISOString();
+      newEvent.start = tmpStartDate.toISOString();
     }
     if (endTimeRef && endTimeRef.current) {
       console.debug("End Time: ", endTimeRef.current.value);
@@ -69,23 +61,24 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
       const newMinute = parseInt(endTimeRef.current.value.substring(3, 5));
       tmpEndDate.setHours(newHour);
       tmpEndDate.setMinutes(newMinute);
-      newEvent.endDate = tmpEndDate.toISOString();
+      newEvent.end = tmpEndDate.toISOString();
     }
     if (titleRef && titleRef.current) {
-      newEvent.name = titleRef.current.value;
+      newEvent.title = titleRef.current.value;
     }
     // console.debug("End Time: ", endTimeRef.current.value);
     // console.debug("Start Time: ", titleRef.current.value);
-    addEvent(newEvent).then((responseData) => {
-      console.debug("Add event data: ", responseData);
-      if (responseData.parsedBody) {
-        props.addEventHandler(responseData.parsedBody);
-      }
-      // sendAddEventRequest(newEvent);
-
-    }).catch((e) => {
-      console.debug("Error adding event: ", e);
-    });
+    addEvent(newEvent)
+      .then((responseData) => {
+        console.debug("Add event data: ", responseData);
+        if (responseData.parsedBody) {
+          props.addEventHandler(responseData.parsedBody);
+        }
+        // sendAddEventRequest(newEvent);
+      })
+      .catch((e) => {
+        console.debug("Error adding event: ", e);
+      });
     // sendEventsRequest(RoomId);
     // modalClose();
   };
@@ -117,7 +110,7 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
                   max={"19:00"}
                   defaultValue={props.startDate.toTimeString().substring(0, 5)}
                   ref={startTimeRef}
-                // onChange={startDateChangeHandler}
+                  // onChange={startDateChangeHandler}
                 />
               </Form.Group>
               <Form.Group as={Col} controlId="meetingEndTime">
@@ -129,7 +122,7 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
                   max={"19:00"}
                   defaultValue={props.endDate.toTimeString().substring(0, 5)}
                   ref={endTimeRef}
-                // onChange={endDateChangeHandler}
+                  // onChange={endDateChangeHandler}
                 />
               </Form.Group>
             </Row>
@@ -139,14 +132,14 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
                 type="text"
                 placeholder="Meeting Title"
                 ref={titleRef}
-              // onChange={titleChangeHandler}
+                // onChange={titleChangeHandler}
               />
             </Form.Group>
             <ClassificationSelect classificationRef={classificationRef} />
             <JDirectorateSelect jDirectorateRef={jDirectorateRef} />
             <Form.Group className="mb-3" controlId="pocPicker">
               <Form.Label>POC</Form.Label>
-              <UserPicker userPickerRef={pocRef} />
+              <UserPicker pocChangeHandler={pocChangeHandler} />
             </Form.Group>
           </Form>
         </Modal.Body>

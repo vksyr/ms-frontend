@@ -5,7 +5,7 @@ import { searchUsers } from "../../lib/api";
 import { User } from "../../model/SOFMS-Model";
 
 interface UserPickerProps {
-  userPickerRef: React.RefObject<Typeahead>;
+  pocChangeHandler: (poc: User) => void;
 }
 
 const UserPicker: FunctionComponent<UserPickerProps> = (props) => {
@@ -23,7 +23,6 @@ const UserPicker: FunctionComponent<UserPickerProps> = (props) => {
       }
 
       setIsLoading(false);
-
     });
   };
 
@@ -40,7 +39,9 @@ const UserPicker: FunctionComponent<UserPickerProps> = (props) => {
         onSearch={handleSearch}
         options={options}
         placeholder="Search for a user..."
-        ref={props.userPickerRef}
+        onChange={(selected) => {
+          props.pocChangeHandler(selected[0] as User);
+        }}
       />
     </Fragment>
   );

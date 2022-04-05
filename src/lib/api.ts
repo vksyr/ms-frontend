@@ -79,17 +79,13 @@ export async function getJDirectorates() {
 }
 export async function getAllEvents() {
   console.debug("getAllEvents");
-  const response = await fetch(`${APIURL}/Event`);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  const response = await get<MtgEvent[]>(`${APIURL}/Event`);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch rooms.");
+  let transformedEvents: MtgEventExtended[] = [];
+
+  if (response.parsedBody) {
+    transformedEvents = processEvents(response.parsedBody);
   }
-
-  console.debug("Data: ", data);
-
-  const transformedEvents = processEvents(data);
 
   console.debug("Transformed Events: ", transformedEvents);
 
@@ -106,17 +102,29 @@ export async function getEventsBy(roomID?: number, classificationID?: number) {
   if (classificationID && classificationID > 0) {
     requestUrl += "classificationID=" + classificationID;
   }
-  const response = await fetch(requestUrl);
-  console.debug("Response: ", response);
-  const data = await response.json();
+  const response = await get<MtgEvent[]>(requestUrl);
 
-  if (!response.ok) {
-    throw new Error(data.message || "Could not fetch rooms.");
+  let transformedEvents: MtgEventExtended[] = [];
+
+  if (response.parsedBody) {
+    transformedEvents = processEvents(response.parsedBody);
   }
 
-  console.debug("Data: ", data);
+  console.debug("Transformed Events: ", transformedEvents);
 
-  const transformedEvents = processEvents(data);
+  return transformedEvents;
+}
+
+export async function getUserEvents(userID: number) {
+  console.debug("getUserEvents");
+  let requestUrl = `${APIURL}/User/${userID}/events`;
+
+  const response = await get<MtgEvent[]>(requestUrl);
+  let transformedEvents: MtgEventExtended[] = [];
+
+  if (response.parsedBody) {
+    transformedEvents = processEvents(response.parsedBody);
+  }
 
   console.debug("Transformed Events: ", transformedEvents);
 
@@ -128,18 +136,30 @@ const processEvents = (events: MtgEvent[]) => {
 
   for (const key in events) {
     const eventObj: MtgEventExtended = {
-      id: key,
-      title: events[key].name as string,
-      start: new Date(events[key].startDate as string),
-      end: new Date(events[key].endDate as string),
-      allDay: false,
       ...events[key],
     };
 
+    if (events[key].approvalCodeID === 1) {
+      // Pending approval
+      eventObj.title += " (Pending Approval)";
+      eventObj.backgroundColor = "#e6f2ff";
+      eventObj.textColor = "black";
+    } else {
+      if (events[key].classification) {
+        const classification = events[key].classification as MtgClassification;
+        if (classification.backgroundColor) {
+          eventObj.backgroundColor = classification.backgroundColor;
+        }
+        if (classification.textColor) {
+          eventObj.textColor = classification.textColor;
+        }
+      }
+    }
+
     if (events[key].recurrenceRule) {
-      if (events[key].startDate && events[key].endDate) {
-        const startDate = new Date(events[key].startDate as string);
-        const endDate = new Date(events[key].endDate as string);
+      if (events[key].start && events[key].end) {
+        const startDate = new Date(events[key].start as string);
+        const endDate = new Date(events[key].end as string);
 
         let rruleOptions: Partial<Options> = RRule.parseString(
           `RRULE:${events[key].recurrenceRule}`

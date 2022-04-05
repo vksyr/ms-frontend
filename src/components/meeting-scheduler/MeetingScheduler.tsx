@@ -1,11 +1,5 @@
-import React, {
-  Fragment,
-  FunctionComponent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import FullCalendar from "@fullcalendar/react";
+import React, { Fragment, FunctionComponent, useState } from "react";
+import FullCalendar, { EventSourceInput } from "@fullcalendar/react";
 import rrulePlugin from "@fullcalendar/rrule";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -16,34 +10,35 @@ import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import classes from "./MeetingScheduler.module.css";
 import LocationSelect from "./LocationSelect";
 import MyMeetings from "./MyMeetings";
-import { addEvent, getEventsBy } from "../../lib/api";
-import useHttp, { HttpReducerStatus } from "../../hooks/use-http";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { getEventsBy } from "../../lib/api";
 import { MtgEvent } from "../../model/SOFMS-Model";
 import EventForm from "./EventForm";
+import { MtgEventExtended } from "../../model/MtgEventExtended";
 
-interface MeetingSchedulerProps { }
+interface MeetingSchedulerProps {}
 
 const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
-  const {
-    sendRequest: sendEventsRequest,
-    status: eventRequestStatus,
-    data: loadedEvents,
-    error: eventRequestError,
-  } = useHttp(getEventsBy, true);
-
-  const startTimeRef = useRef<HTMLInputElement>(null);
-  const endTimeRef = useRef<HTMLInputElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
+  const [events, setEvents] = useState<MtgEventExtended[]>();
 
   const [RoomId, setRoomId] = useState(0);
   const [MeetingModal, setMeetingModal] = useState(false);
   const [MeetingStartDate, setMeetingStartDate] = useState(new Date());
   const [MeetingEndDate, setMeetingEndDate] = useState(new Date());
 
+  const loadEvents = (roomId: number) => {
+    getEventsBy(roomId).then((responseData) => {
+      setEvents(responseData);
+    });
+  };
+
   const roomChangeHandler = (roomId: number) => {
-    sendEventsRequest(roomId);
-    setRoomId(roomId);
+    if (roomId && roomId > 0) {
+      setRoomId(roomId);
+      loadEvents(roomId);
+    } else {
+      setRoomId(0);
+      setEvents([]);
+    }
   };
 
   const modalClose = () => {
@@ -55,22 +50,22 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
   };
 
   const dateClickHandler = (dateInfo: DateClickArg) => {
-    console.debug("Date click: ", dateInfo);
-    setMeetingStartDate(dateInfo.date);
+    if (RoomId && RoomId > 0) {
+      console.debug("Date click: ", dateInfo);
+      setMeetingStartDate(dateInfo.date);
 
-    const endDate = new Date(dateInfo.date);
-    endDate.setMinutes(endDate.getMinutes() + 30);
-    setMeetingEndDate(endDate);
+      const endDate = new Date(dateInfo.date);
+      endDate.setMinutes(endDate.getMinutes() + 30);
+      setMeetingEndDate(endDate);
 
-    modalShow();
+      modalShow();
+    }
   };
 
   const addEventHandler = (newEvent: MtgEvent) => {
-
-    sendEventsRequest();
+    loadEvents(RoomId);
 
     modalClose();
-
   };
 
   return (
@@ -92,6 +87,7 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
             slotMinTime={"07:00:00"}
             slotMaxTime={"19:00:00"}
             slotDuration={"00:15:00"}
+            height={"auto"}
             headerToolbar={{
               start: "title",
               center: "timeGridDay,timeGridWeek,dayGridMonth,listWeek",
@@ -105,7 +101,7 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
               hour12: false,
             }}
             allDaySlot={false}
-            events={loadedEvents}
+            events={events as EventSourceInput}
             dateClick={dateClickHandler}
           />
         </div>
@@ -113,7 +109,14 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
           <MyMeetings />
         </div>
       </div>
-      <EventForm roomId={RoomId} startDate={MeetingStartDate} endDate={MeetingEndDate} modalShow={MeetingModal} closeModalHandler={modalClose} addEventHandler={addEventHandler} />
+      <EventForm
+        roomId={RoomId}
+        startDate={MeetingStartDate}
+        endDate={MeetingEndDate}
+        modalShow={MeetingModal}
+        closeModalHandler={modalClose}
+        addEventHandler={addEventHandler}
+      />
     </Fragment>
   );
 };
