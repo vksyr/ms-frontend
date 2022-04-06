@@ -115,9 +115,13 @@ export async function getEventsBy(roomID?: number, classificationID?: number) {
   return transformedEvents;
 }
 
-export async function getUserEvents(userID: number) {
+export async function getUserEvents(userID: number, days?: number) {
   console.debug("getUserEvents");
-  let requestUrl = `${APIURL}/User/${userID}/events`;
+  let requestUrl = `${APIURL}/User/${userID}/events?`;
+
+  if (days && days > 0) {
+    requestUrl += "days=" + days;
+  }
 
   const response = await get<MtgEvent[]>(requestUrl);
   let transformedEvents: MtgEventExtended[] = [];
