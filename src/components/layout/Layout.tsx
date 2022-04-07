@@ -1,4 +1,5 @@
 import { FunctionComponent, Fragment } from "react";
+import { Container } from "react-bootstrap";
 import classes from "./Layout.module.css";
 
 interface LayoutProps {}
@@ -6,7 +7,9 @@ interface LayoutProps {}
 const Layout: FunctionComponent<LayoutProps> = (props) => {
   return (
     <Fragment>
-      <main className={"container-fluid"}>{props.children}</main>
+      <main>
+        <Container fluid>{props.children}</Container>
+      </main>
     </Fragment>
   );
 };

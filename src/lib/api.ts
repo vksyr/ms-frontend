@@ -204,7 +204,7 @@ export async function addEvent(newEvent: MtgEvent) {
 
 export async function searchUsers(search: string) {
   console.debug("searchUsers");
-  const response = await get<User[]>(`${APIURL}/User`);
+  const response = await get<User[]>(`${APIURL}/User?commonName=${search}`);
 
   return response;
 }

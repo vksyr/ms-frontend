@@ -1,8 +1,17 @@
-import React, { Fragment, FunctionComponent, useRef, useState } from "react";
+import React, {
+  Fragment,
+  FunctionComponent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import classes from "./EventForm.module.css";
 import { addEvent } from "../../lib/api";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import setHours from "date-fns/setHours";
+import setMinutes from "date-fns/setMinutes";
 import { MtgEvent, User } from "../../model/SOFMS-Model";
 import ClassificationSelect from "./ClassificationSelect";
 import JDirectorateSelect from "./JDirectorateSelect";
@@ -19,21 +28,46 @@ interface EventFormProps {
 
 const EventForm: FunctionComponent<EventFormProps> = (props) => {
   const [selectedPOC, setSelectedPOC] = useState<User>();
-  const startTimeRef = useRef<HTMLInputElement>(null);
-  const endTimeRef = useRef<HTMLInputElement>(null);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [filterTimes, setFilterTimes] = useState<Date[]>([]);
+
   const titleRef = useRef<HTMLInputElement>(null);
   const jDirectorateRef = useRef<HTMLSelectElement>(null);
   const classificationRef = useRef<HTMLSelectElement>(null);
   // const pocRef = useRef<Typeahead>(null);
 
+  useEffect(() => {
+    setStartDate(props.startDate);
+    setEndDate(props.endDate);
+  }, [props.startDate, props.endDate]);
+
   const pocChangeHandler = (poc: User) => {
     setSelectedPOC(poc);
+  };
+
+  const startDateChangeHandler = (date: Date) => {
+    setStartDate(date);
+    const newEndDate = new Date(date);
+    newEndDate.setHours(endDate.getHours());
+    newEndDate.setMinutes(endDate.getMinutes());
+    setEndDate(newEndDate);
+    // TODO: Filter times based on date
+  };
+  const startTimeChangeHandler = (date: Date) => {
+    setStartDate(date);
+  };
+  const endTimeChangeHandler = (date: Date) => {
+    setEndDate(date);
   };
 
   const newMeetingBookHandler = () => {
     const newEvent: MtgEvent = {};
     newEvent.roomID = props.roomId;
     newEvent.approvalCodeID = 1;
+
+    newEvent.start = startDate.toISOString();
+    newEvent.end = endDate.toISOString();
 
     if (selectedPOC) {
       console.debug("Selected POC: ", selectedPOC);
@@ -44,24 +78,6 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
     }
     if (classificationRef && classificationRef.current) {
       newEvent.classificationID = parseInt(classificationRef.current.value);
-    }
-    if (startTimeRef && startTimeRef.current) {
-      console.debug("Start Time: ", startTimeRef.current.value);
-      const tmpStartDate = new Date(props.startDate);
-      const newHour = parseInt(startTimeRef.current.value.substring(0, 2));
-      const newMinute = parseInt(startTimeRef.current.value.substring(3, 5));
-      tmpStartDate.setHours(newHour);
-      tmpStartDate.setMinutes(newMinute);
-      newEvent.start = tmpStartDate.toISOString();
-    }
-    if (endTimeRef && endTimeRef.current) {
-      console.debug("End Time: ", endTimeRef.current.value);
-      const tmpEndDate = new Date(props.startDate);
-      const newHour = parseInt(endTimeRef.current.value.substring(0, 2));
-      const newMinute = parseInt(endTimeRef.current.value.substring(3, 5));
-      tmpEndDate.setHours(newHour);
-      tmpEndDate.setMinutes(newMinute);
-      newEvent.end = tmpEndDate.toISOString();
     }
     if (titleRef && titleRef.current) {
       newEvent.title = titleRef.current.value;
@@ -93,36 +109,44 @@ const EventForm: FunctionComponent<EventFormProps> = (props) => {
           <Form>
             <Form.Group className="mb-3" controlId="meetingDate">
               <Form.Label>Date</Form.Label>
-              <Form.Control
-                type="date"
-                placeholder="Date"
-                readOnly={true}
-                value={props.startDate.toISOString().substring(0, 10)}
+              <DatePicker
+                className="form-control"
+                selected={startDate}
+                onChange={startDateChangeHandler}
               />
             </Form.Group>
             <Row className="mb-3">
               <Form.Group as={Col} controlId="meetingStartTime">
                 <Form.Label>Start Time</Form.Label>
-                <Form.Control
-                  type="time"
-                  placeholder="Start"
-                  min={"07:00"}
-                  max={"19:00"}
-                  defaultValue={props.startDate.toTimeString().substring(0, 5)}
-                  ref={startTimeRef}
-                  // onChange={startDateChangeHandler}
+                <DatePicker
+                  className="form-control"
+                  selected={startDate}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={15}
+                  timeCaption="Time"
+                  timeFormat="HH:mm"
+                  dateFormat="HH:mm"
+                  minTime={setHours(setMinutes(new Date(), 0), 7)}
+                  maxTime={setHours(setMinutes(new Date(), 0), 19)}
+                  excludeTimes={filterTimes}
+                  onChange={startTimeChangeHandler}
                 />
               </Form.Group>
               <Form.Group as={Col} controlId="meetingEndTime">
                 <Form.Label>End Time</Form.Label>
-                <Form.Control
-                  type="time"
-                  placeholder="End"
-                  min={"07:00"}
-                  max={"19:00"}
-                  defaultValue={props.endDate.toTimeString().substring(0, 5)}
-                  ref={endTimeRef}
-                  // onChange={endDateChangeHandler}
+                <DatePicker
+                  className="form-control"
+                  selected={endDate}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={15}
+                  timeCaption="Time"
+                  timeFormat="HH:mm"
+                  dateFormat="HH:mm"
+                  minTime={setHours(setMinutes(new Date(), 0), 7)}
+                  maxTime={setHours(setMinutes(new Date(), 0), 19)}
+                  onChange={endTimeChangeHandler}
                 />
               </Form.Group>
             </Row>
