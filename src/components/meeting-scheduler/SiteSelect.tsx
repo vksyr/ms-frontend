@@ -3,7 +3,7 @@ import { getAllSites } from "../../lib/api";
 import { Site } from "../../model/SOFMS-Model";
 
 interface SiteSelectProps {
-  siteChange: (siteId: number) => void
+  siteChange: (siteId: number) => void;
 }
 
 const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
@@ -15,17 +15,14 @@ const SiteSelect: FunctionComponent<SiteSelectProps> = (props) => {
     });
   }, [getAllSites]);
 
-  const handleSiteChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleSiteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // setSite(e.target.value);
     props.siteChange(parseInt(e.target.value));
-
   };
 
   return (
     <Fragment>
-      <label className="form-label">Site</label>
+      <label className="form-label m-1">Site</label>
       <select
         id="ddLocation"
         className="form-select"

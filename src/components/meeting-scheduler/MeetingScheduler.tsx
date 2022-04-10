@@ -6,10 +6,12 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
+import PersonIcon from "@mui/icons-material/Person";
+import CloseIcon from "@mui/icons-material/Close";
 
 import classes from "./MeetingScheduler.module.css";
 import LocationSelect from "./LocationSelect";
-import MyMeetings from "./MyMeetings";
+import MyMeetings2 from "./MyMeetings2";
 import { getEventsBy } from "../../lib/api";
 import { MtgEvent } from "../../model/SOFMS-Model";
 import EventForm from "./EventForm";
@@ -21,9 +23,11 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
   const [events, setEvents] = useState<MtgEventExtended[]>();
 
   const [RoomId, setRoomId] = useState(0);
-  const [MeetingModal, setMeetingModal] = useState(false);
+  const [MyMeetingsModal, setMyMeetingsModal] = useState(false);
+  const [EventFormModal, setEventFormModal] = useState(false);
   const [MeetingStartDate, setMeetingStartDate] = useState(new Date());
   const [MeetingEndDate, setMeetingEndDate] = useState(new Date());
+  const [PersonIconCss, setPersonIconCss] = useState("inactive");
 
   const loadEvents = (roomId: number) => {
     getEventsBy(roomId).then((responseData) => {
@@ -41,12 +45,12 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
     }
   };
 
-  const modalClose = () => {
-    setMeetingModal(false);
+  const eventFormModalClose = () => {
+    setEventFormModal(false);
   };
 
-  const modalShow = () => {
-    setMeetingModal(true);
+  const eventFormModalShow = () => {
+    setEventFormModal(true);
   };
 
   const dateClickHandler = (dateInfo: DateClickArg) => {
@@ -58,21 +62,56 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
       endDate.setMinutes(endDate.getMinutes() + 30);
       setMeetingEndDate(endDate);
 
-      modalShow();
+      eventFormModalShow();
     }
   };
 
   const addEventHandler = (newEvent: MtgEvent) => {
     loadEvents(RoomId);
 
-    modalClose();
+    eventFormModalClose();
+  };
+
+  const onPersonIconClick = () => {
+    if (MyMeetingsModal) {
+      setMyMeetingsModal(false);
+      setPersonIconCss("inactive");
+    } else {
+      setMyMeetingsModal(true);
+      setPersonIconCss("active");
+    }
   };
 
   return (
     <Fragment>
-      <div className="row">
-        <div className="col-9">
-          <LocationSelect roomChange={roomChangeHandler} />
+      <nav className="navbar navbar-default">
+        <div className="container-fluid col-11">
+          <div className="col-9">
+            <a className="navbar-brand" href="/meetings/ui/index.html">
+              Meeting Scheduler
+            </a>
+          </div>
+          <div className="float-right text-right">
+            <label
+              className={"d-block ms-person-icon-" + PersonIconCss}
+              onClick={onPersonIconClick}
+            >
+              <PersonIcon
+                style={{
+                  fill: "white",
+                  alignItems: "end",
+                  display: "flex"
+                }}
+              />
+            </label>
+          </div>
+        </div>
+      </nav>
+      <div className="row bg-light">
+        <LocationSelect roomChange={roomChangeHandler} />
+      </div>
+      <div className="row bg-light justify-content-center">
+        <div className="col-11">
           <FullCalendar
             plugins={[
               bootstrap5Plugin,
@@ -80,7 +119,7 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
               dayGridPlugin,
               timeGridPlugin,
               listPlugin,
-              interactionPlugin,
+              interactionPlugin
             ]}
             themeSystem="bootstrap5"
             initialView="timeGridWeek"
@@ -89,33 +128,34 @@ const MeetingScheduler: FunctionComponent<MeetingSchedulerProps> = () => {
             slotDuration={"00:15:00"}
             height={"auto"}
             headerToolbar={{
-              start: "title",
-              center: "timeGridDay,timeGridWeek,dayGridMonth,listWeek",
-              end: "today prev,next",
+              start: "timeGridDay,timeGridWeek,dayGridMonth,listWeek",
+              center: "title",
+              end: "prev,next"
             }}
             weekends={false}
             slotLabelFormat={{
               hour: "2-digit",
               minute: "2-digit",
               omitZeroMinute: false,
-              hour12: false,
+              hour12: false
             }}
             allDaySlot={false}
             events={events as EventSourceInput}
             dateClick={dateClickHandler}
           />
         </div>
-        <div className="col-3">
-          <MyMeetings />
-        </div>
       </div>
       <EventForm
         roomId={RoomId}
         startDate={MeetingStartDate}
         endDate={MeetingEndDate}
-        modalShow={MeetingModal}
-        closeModalHandler={modalClose}
+        modalShow={EventFormModal}
+        closeModalHandler={eventFormModalClose}
         addEventHandler={addEventHandler}
+      />
+      <MyMeetings2
+        modalShow={MyMeetingsModal}
+        closeModalHandler={onPersonIconClick}
       />
     </Fragment>
   );

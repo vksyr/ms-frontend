@@ -4,8 +4,8 @@ import { getBuildingsBySite } from "../../lib/api";
 import { Building } from "../../model/SOFMS-Model";
 
 interface BuildingSelectProps {
-  siteId: number,
-  buildingChange: (buildingId: number) => void
+  siteId: number;
+  buildingChange: (buildingId: number) => void;
 }
 
 const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
@@ -20,16 +20,14 @@ const BuildingSelect: FunctionComponent<BuildingSelectProps> = (props) => {
     }
   }, [getBuildingsBySite, props.siteId]);
 
-  const handleBuildingChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleBuildingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // setBuilding(e.target.value);
     props.buildingChange(parseInt(e.target.value));
   };
 
   return (
     <Fragment>
-      <label className="form-label">Building</label>
+      <label className="form-label m-1">Building</label>
       <select
         id="ddLocation"
         className="form-select"

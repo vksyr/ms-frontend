@@ -4,8 +4,8 @@ import { getRoomsByBuilding } from "../../lib/api";
 import { Room } from "../../model/SOFMS-Model";
 
 interface RoomSelectProps {
-  buildingId: number,
-  roomChange: (roomId: number) => void
+  buildingId: number;
+  roomChange: (roomId: number) => void;
 }
 
 const RoomSelect: FunctionComponent<RoomSelectProps> = (props) => {
@@ -20,16 +20,14 @@ const RoomSelect: FunctionComponent<RoomSelectProps> = (props) => {
     }
   }, [getRoomsByBuilding, props.buildingId]);
 
-  const handleRoomChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleRoomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     // setRoom(e.target.value);
     props.roomChange(parseInt(e.target.value));
   };
 
   return (
     <Fragment>
-      <label className="form-label">Room</label>
+      <label className="form-label m-1">Room</label>
       <select
         id="ddLocation"
         className="form-select"

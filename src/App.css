@@ -7,6 +7,31 @@
   pointer-events: none;
 }
 
+.container-fluid {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+body {
+  background-color: #212832;
+}
+
+.navbar {
+  background-color: #000;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.navbar a {
+  color: #fff;
+}
+
+.bg-light,
+.footer-light {
+  --bs-bg-opacity: 1;
+  background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -35,4 +60,155 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.fc .fc-toolbar {
+  display: block !important;
+}
+
+.fc .fc-toolbar-chunk {
+  text-align: center;
+}
+
+.fc .fc-toolbar-title {
+  padding-top: 21px;
+  font-size: 1.25em !important;
+}
+
+.fc .fc-toolbar-chunk:nth-child(1) .btn-group {
+  border: 1px solid var(--bs-gray-400);
+  border-radius: 3px;
+  padding: 2px;
+  width: 100%;
+  background-color: #fff;
+}
+
+.fc .fc-toolbar-chunk .btn-primary {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid transparent;
+  border-radius: 3px !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.fc .fc-toolbar-chunk .active {
+  background-color: #0d6efd;
+  color: #fff;
+  border-color: #000;
+}
+
+.fc .fc-toolbar-chunk:nth-child(3) {
+  margin-top: -7px;
+}
+
+.fc .fc-toolbar-chunk:nth-child(3) .btn-group {
+  display: block;
+}
+
+.fc .fc-prev-button {
+  position: absolute;
+  left: 0px;
+  top: -20px;
+}
+
+.fc .fc-next-button {
+  position: absolute;
+  right: 0px;
+  top: -20px;
+}
+
+.fc .fc-scrollgrid {
+  background-color: #fff;
+}
+
+.ms-person-icon-active,
+.ms-person-icon-inactive {
+  cursor: pointer;
+  padding: 11px;
+  margin-bottom: -22px;
+  margin-top: -16px;
+  height: 52px;
+  margin-right: -8px;
+}
+
+.ms-person-icon-active {
+  background-color: #fff;
+}
+
+.ms-person-icon-active svg {
+  fill: #000 !important;
+}
+
+.modal.right .modal-dialog {
+  margin: auto;
+
+  height: 100%;
+  -webkit-transform: translate3d(0%, 0, 0);
+  -ms-transform: translate3d(0%, 0, 0);
+  -o-transform: translate3d(0%, 0, 0);
+  transform: translate3d(0%, 0, 0);
+}
+
+.modal.right {
+  overflow-y: hidden;
+}
+
+.modal.right .modal-content {
+  height: calc(100% - 46px);
+  overflow-y: auto;
+}
+
+.modal.right .modal-body {
+  padding: 15px 15px 80px;
+}
+
+.modal.right.fade .modal-dialog {
+  right: -355px;
+  top: 46px;
+  -webkit-transition: opacity 0.3s linear, right 0.3s ease-out;
+  -moz-transition: opacity 0.3s linear, right 0.3s ease-out;
+  -o-transition: opacity 0.3s linear, right 0.3s ease-out;
+  transition: opacity 0.3s linear, right 0.3s ease-out;
+}
+
+.modal.right.fade.in .modal-dialog {
+  right: 0;
+}
+
+.ms-myMeetings .btn-group {
+  border: 1px solid var(--bs-gray-400);
+  border-radius: 3px;
+  padding: 2px;
+  width: 100%;
+  background-color: #fff;
+  margin-bottom: 11px;
+}
+
+.ms-myMeetings .btn-primary {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid transparent;
+  border-radius: 3px !important;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.ms-myMeetings .active {
+  background-color: #0d6efd;
+  color: #fff;
+  border-color: #000;
+}
+
+.ms-myMeetings .modal-title {
+  font-size: 17px;
+}
+
+.ms-myMeetings .modal-header {
+  border: 0px;
+  padding-bottom: 0px;
+}
+
+.ms-myMeetings .btn-close {
+  font-size: 11px;
 }
